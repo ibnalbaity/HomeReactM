@@ -1,19 +1,14 @@
-import PropTypes from 'prop-types';
-import { useCallback } from 'react';
+import PropTypes from "prop-types";
+import { useCallback } from "react";
 // @mui
-import Stack from '@mui/material/Stack';
-import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
-import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
-import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputAdornment from '@mui/material/InputAdornment';
-import Select from '@mui/material/Select';
+import Stack from "@mui/material/Stack";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 // components
-import Iconify from 'src/components/iconify';
-import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import Iconify from "src/components/iconify";
+import CustomPopover, { usePopover } from "src/components/custom-popover";
 
 // ----------------------------------------------------------------------
 
@@ -21,7 +16,7 @@ export default function UserTableToolbar({
   filters,
   onFilters,
   //
-  roleOptions,
+  /* roleOptions, */
 }) {
   const popover = usePopover();
 
@@ -32,7 +27,7 @@ export default function UserTableToolbar({
     [onFilters]
   );
 
-  const handleFilterRole = useCallback(
+  /* const handleFilterRole = useCallback(
     (event) => {
       onFilters(
         'role',
@@ -40,7 +35,7 @@ export default function UserTableToolbar({
       );
     },
     [onFilters]
-  );
+  ); */
 
   return (
     <>
@@ -56,7 +51,7 @@ export default function UserTableToolbar({
           pr: { xs: 2.5, md: 1 },
         }}
       >
-        <FormControl
+        {/* <FormControl
           sx={{
             flexShrink: 0,
             width: { xs: 1, md: 200 },
@@ -83,7 +78,7 @@ export default function UserTableToolbar({
               </MenuItem>
             ))}
           </Select>
-        </FormControl>
+        </FormControl> */}
 
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
           <TextField
@@ -146,5 +141,5 @@ export default function UserTableToolbar({
 UserTableToolbar.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
-  roleOptions: PropTypes.array,
+  /* roleOptions: PropTypes.array, */
 };

@@ -1,80 +1,107 @@
-import isEqual from 'lodash/isEqual';
-import { useState, useCallback } from 'react';
+import isEqual from "lodash/isEqual";
+import { useCallback, useEffect, useState } from "react";
 // @mui
-import { alpha } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import Container from '@mui/material/Container';
-import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
-import TableContainer from '@mui/material/TableContainer';
+import Card from "@mui/material/Card";
+import Table from "@mui/material/Table";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import Container from "@mui/material/Container";
+import TableBody from "@mui/material/TableBody";
+import IconButton from "@mui/material/IconButton";
+import TableContainer from "@mui/material/TableContainer";
+// redux
+import { useDispatch } from "src/redux/store";
+import { getUsers } from "src/redux/slices/user";
 // routes
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hook';
-import { RouterLink } from 'src/routes/components';
+import { paths } from "src/routes/paths";
+import { useRouter } from "src/routes/hook";
+import { RouterLink } from "src/routes/components";
 // _mock
-import { _userList, _roles, USER_STATUS_OPTIONS } from 'src/_mock';
 // hooks
-import { useBoolean } from 'src/hooks/use-boolean';
+import { useBoolean } from "src/hooks/use-boolean";
 // components
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
-import Scrollbar from 'src/components/scrollbar';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import { useSettingsContext } from 'src/components/settings';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import Iconify from "src/components/iconify";
+import Scrollbar from "src/components/scrollbar";
+import { ConfirmDialog } from "src/components/custom-dialog";
+import { useSettingsContext } from "src/components/settings";
+import CustomBreadcrumbs from "src/components/custom-breadcrumbs";
 import {
-  useTable,
-  getComparator,
   emptyRows,
-  TableNoData,
+  getComparator,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
+  TableNoData,
   TablePaginationCustom,
-} from 'src/components/table';
+  TableSelectedAction,
+  TableSkeleton,
+  useTable
+} from "src/components/table";
+import { useUser } from "./hooks";
 //
-import UserTableRow from '../user-table-row';
-import UserTableToolbar from '../user-table-toolbar';
-import UserTableFiltersResult from '../user-table-filters-result';
+import UserTableRow from "../user-table-row";
+import UserTableToolbar from "../user-table-toolbar";
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
+// const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'phoneNumber', label: 'Phone Number', width: 180 },
-  { id: 'company', label: 'Company', width: 220 },
-  { id: 'role', label: 'Role', width: 180 },
-  { id: 'status', label: 'Status', width: 100 },
+  { id: 'name', label: 'الاسم' },
+  { id: 'phoneNumber', label: 'رقم الهوية', width: 180 },
+  { id: 'company', label: 'تاريخ الإنتهاء', width: 220 },
+  /* { id: 'role', label: 'النوع', width: 180 },
+  { id: 'status', label: 'تاريخ التحديث', width: 100 }, */
   { id: '', width: 88 },
 ];
 
 const defaultFilters = {
   name: '',
-  role: [],
-  status: 'all',
+  /* role: [],
+  status: 'all', */
 };
 
 // ----------------------------------------------------------------------
 
+function useInitial() {
+  const dispatch = useDispatch();
+
+  const getProductsCallback = useCallback(() => {
+    dispatch(getUsers({ populate: 'deep, 3' }));
+  }, [dispatch]);
+
+  useEffect(() => {
+    getProductsCallback();
+  }, [getProductsCallback]);
+
+  return null;
+}
+
+// ----------------------------------------------------------------------
+
 export default function UserListView() {
+  useInitial();
+
   const table = useTable();
 
   const settings = useSettingsContext();
 
   const router = useRouter();
 
-  const confirm = useBoolean();
+  const { users, usersStatus } = useUser();
 
-  const [tableData, setTableData] = useState(_userList);
+  const [tableData, setTableData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
+
+  const confirm = useBoolean();
+
+  useEffect(() => {
+    if (users.length) {
+      setTableData(users);
+    }
+  }, [users]);
+
+  console.warn(tableData);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -91,7 +118,8 @@ export default function UserListView() {
 
   const canReset = !isEqual(defaultFilters, filters);
 
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+  const notFound =
+    (!dataFiltered.length && canReset)|| (!usersStatus.loading && !dataFiltered.length);
 
   const handleFilters = useCallback(
     (name, value) => {
@@ -132,7 +160,14 @@ export default function UserListView() {
     [router]
   );
 
-  const handleFilterStatus = useCallback(
+  const handleViewRow = useCallback(
+    (id) => {
+      router.push(paths.dashboard.user.details(id));
+    },
+    [router]
+  );
+
+  /* const handleFilterStatus = useCallback(
     (event, newValue) => {
       handleFilters('status', newValue);
     },
@@ -141,7 +176,7 @@ export default function UserListView() {
 
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
-  }, []);
+  }, []); */
 
   return (
     <>
@@ -169,7 +204,7 @@ export default function UserListView() {
         />
 
         <Card>
-          <Tabs
+          {/* <Tabs
             value={filters.status}
             onChange={handleFilterStatus}
             sx={{
@@ -209,16 +244,16 @@ export default function UserListView() {
                 }
               />
             ))}
-          </Tabs>
+          </Tabs> */}
 
           <UserTableToolbar
             filters={filters}
             onFilters={handleFilters}
             //
-            roleOptions={_roles}
+            /* roleOptions={_roles} */
           />
 
-          {canReset && (
+          {/* {canReset && (
             <UserTableFiltersResult
               filters={filters}
               onFilters={handleFilters}
@@ -228,7 +263,7 @@ export default function UserListView() {
               results={dataFiltered.length}
               sx={{ p: 2.5, pt: 0 }}
             />
-          )}
+          )} */}
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
             <TableSelectedAction
@@ -251,7 +286,7 @@ export default function UserListView() {
             />
 
             <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 560 }}>
                 <TableHeadCustom
                   order={table.order}
                   orderBy={table.orderBy}
@@ -268,21 +303,30 @@ export default function UserListView() {
                 />
 
                 <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <UserTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                        onEditRow={() => handleEditRow(row.id)}
-                      />
-                    ))}
+                  {usersStatus.loading ? (
+                    [...Array(table.rowsPerPage)].map((i, index) => (
+                      <TableSkeleton key={index} sx={{ height: denseHeight }} />
+                    ))
+                  ) : (
+                    <>
+                      {dataFiltered
+                        .slice(
+                          table.page * table.rowsPerPage,
+                          table.page * table.rowsPerPage + table.rowsPerPage
+                        )
+                        .map((row) => (
+                          <UserTableRow
+                            key={row.id}
+                            row={row}
+                            selected={table.selected.includes(row.id)}
+                            onSelectRow={() => table.onSelectRow(row.id)}
+                            onDeleteRow={() => handleDeleteRow(row.id)}
+                            onEditRow={() => handleEditRow(row.id)}
+                            onViewRow={() => handleViewRow(row.id)}
+                          />
+                        ))}
+                    </>
+                  )}
 
                   <TableEmptyRows
                     height={denseHeight}
@@ -337,7 +381,7 @@ export default function UserListView() {
 // ----------------------------------------------------------------------
 
 function applyFilter({ inputData, comparator, filters }) {
-  const { name, status, role } = filters;
+  const { name/* , status, role */ } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -351,17 +395,17 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (name) {
     inputData = inputData.filter(
-      (user) => user.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+      (user) => user.username.toLowerCase().indexOf(name.toLowerCase()) !== -1
     );
   }
 
-  if (status !== 'all') {
+  /* if (status !== 'all') {
     inputData = inputData.filter((user) => user.status === status);
   }
 
   if (role.length) {
     inputData = inputData.filter((user) => role.includes(user.role));
-  }
+  } */
 
   return inputData;
 }

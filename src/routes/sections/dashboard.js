@@ -55,6 +55,7 @@ export const dashboardRoutes = [
         children: [
           { element: <UserProfilePage />, index: true },
           { path: 'profile', element: <UserProfilePage /> },
+          { path: ':id', element: <UserProfilePage /> },
           { path: 'cards', element: <UserCardsPage /> },
           { path: 'list', element: <UserListPage /> },
           { path: 'new', element: <UserCreatePage /> },

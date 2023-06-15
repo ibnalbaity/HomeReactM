@@ -63,7 +63,6 @@ export function AuthProvider({ children }) {
 
         const response = await axios.get(API_ENDPOINTS.auth.me);
 
-        console.log(response);
         const { data } = response;
 
         dispatch({

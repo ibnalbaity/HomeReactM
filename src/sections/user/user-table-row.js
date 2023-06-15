@@ -1,5 +1,7 @@
 // @mui
 import PropTypes from 'prop-types';
+import Box from "@mui/material/Box";
+import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
@@ -12,17 +14,19 @@ import ListItemText from '@mui/material/ListItemText';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
-import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 //
 import UserQuickEditForm from './user-quick-edit-form';
+import { fDate } from "../../utils/format-time";
 
 // ----------------------------------------------------------------------
 
-export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { name, avatarUrl, company, role, status, email, phoneNumber } = row;
+export default function UserTableRow({ row, selected, onEditRow, onViewRow, onSelectRow, onDeleteRow }) {
+  const { avatarUrl, email, identification, username } = row;
+
+  const { mainInfo } = identification;
 
   const confirm = useBoolean();
 
@@ -38,35 +42,52 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={name} src={avatarUrl} sx={{ mr: 2 }} />
+          <Avatar alt={username} src={avatarUrl} sx={{ mr: 2 }} />
 
           <ListItemText
-            primary={name}
-            secondary={email}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{ component: 'span', color: 'text.disabled' }}
+            disableTypography
+            primary={
+              <Link
+                noWrap
+                color="inherit"
+                variant="subtitle2"
+                onClick={onViewRow}
+                sx={{ cursor: 'pointer' }}
+              >
+                {username}
+              </Link>
+            }
+            secondary={
+              <Link
+                component="div"
+                onClick={onViewRow}
+                sx={{ typography: 'body2', color: 'text.disabled', cursor: 'pointer' }}
+              >
+                {email}
+              </Link>
+            }
           />
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{mainInfo[0]?.idCard}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{company}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{fDate(mainInfo[0]?.expire)}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{role}</TableCell>
+        {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>{provider}</TableCell>
 
         <TableCell>
           <Label
             variant="soft"
             color={
-              (status === 'active' && 'success') ||
-              (status === 'pending' && 'warning') ||
-              (status === 'banned' && 'error') ||
+              (updatedAt === 'active' && 'success') ||
+              (updatedAt === 'pending' && 'warning') ||
+              (updatedAt === 'banned' && 'error') ||
               'default'
             }
           >
-            {status}
+            {fDate(updatedAt)}
           </Label>
-        </TableCell>
+        </TableCell> */}
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <Tooltip title="Quick Edit" placement="top" arrow>
@@ -91,13 +112,12 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
       >
         <MenuItem
           onClick={() => {
-            confirm.onTrue();
+            onViewRow();
             popover.onClose();
           }}
-          sx={{ color: 'error.main' }}
         >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
+          <Iconify icon="solar:eye-bold" />
+          عرض
         </MenuItem>
 
         <MenuItem
@@ -107,7 +127,18 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           }}
         >
           <Iconify icon="solar:pen-bold" />
-          Edit
+          تعديل
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            confirm.onTrue();
+            popover.onClose();
+          }}
+          sx={{ color: 'error.main' }}
+        >
+          <Iconify icon="solar:trash-bin-trash-bold" />
+          حذف
         </MenuItem>
       </CustomPopover>
 
@@ -130,6 +161,7 @@ UserTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
   onEditRow: PropTypes.func,
   onSelectRow: PropTypes.func,
+  onViewRow: PropTypes.func,
   row: PropTypes.object,
   selected: PropTypes.bool,
 };

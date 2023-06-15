@@ -1,13 +1,13 @@
 // @mui
-import { useTheme, alpha } from '@mui/material/styles';
-import GlobalStyles from '@mui/material/GlobalStyles';
+import { alpha, useTheme } from "@mui/material/styles";
+import GlobalStyles from "@mui/material/GlobalStyles";
 
 // ----------------------------------------------------------------------
 
 export default function StyledLightbox() {
   const theme = useTheme();
 
-  const inputGlobalStyles = (
+  return (
     <GlobalStyles
       styles={{
         '.yarl__root': {
@@ -48,6 +48,4 @@ export default function StyledLightbox() {
       }}
     />
   );
-
-  return inputGlobalStyles;
 }

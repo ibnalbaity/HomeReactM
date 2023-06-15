@@ -1,25 +1,34 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from "react";
 // @mui
-import Tab from '@mui/material/Tab';
-import Card from '@mui/material/Card';
-import Container from '@mui/material/Container';
-import Tabs, { tabsClasses } from '@mui/material/Tabs';
+import Tab from "@mui/material/Tab";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import Container from "@mui/material/Container";
+import Tabs, { tabsClasses } from "@mui/material/Tabs";
+// redux
+import { useDispatch } from "src/redux/store";
+import { getUser } from "src/redux/slices/user";
 // routes
-import { paths } from 'src/routes/paths';
+import { paths } from "src/routes/paths";
+import { useParams } from 'src/routes/hook';
+import { RouterLink } from 'src/routes/components';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+// import { useMockedUser } from "src/hooks/use-mocked-user";
 // _mock
-import { _userAbout, _userFeeds, _userFriends, _userGallery, _userFollowers } from 'src/_mock';
+import { _userAbout, _userFeeds, _userFollowers, _userFriends, _userGallery } from "src/_mock";
 // components
-import Iconify from 'src/components/iconify';
-import { useSettingsContext } from 'src/components/settings';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import Iconify from "src/components/iconify";
+import EmptyContent from 'src/components/empty-content';
+import { useSettingsContext } from "src/components/settings";
+import CustomBreadcrumbs from "src/components/custom-breadcrumbs";
 //
-import ProfileHome from '../profile-home';
-import ProfileCover from '../profile-cover';
-import ProfileFriends from '../profile-friends';
-import ProfileGallery from '../profile-gallery';
-import ProfileFollowers from '../profile-followers';
+import ProfileHome from "../profile-home";
+import ProfileCover from "../profile-cover";
+import ProfileFriends from "../profile-friends";
+import ProfileGallery from "../profile-gallery";
+import ProfileFollowers from "../profile-followers";
+import { UserProfileSkeleton } from "../user-skeleton";
+import { useUser } from "./hooks";
 
 // ----------------------------------------------------------------------
 
@@ -48,10 +57,36 @@ const TABS = [
 
 // ----------------------------------------------------------------------
 
+function useInitial() {
+  const dispatch = useDispatch();
+
+  const params = useParams();
+
+  const { id } = params;
+
+  const getProductCallback = useCallback(() => {
+    if (id) {
+      dispatch(getUser(id));
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    getProductCallback();
+  }, [getProductCallback]);
+
+  return null;
+}
+
+// ----------------------------------------------------------------------
+
 export default function UserProfileView() {
+  useInitial();
+
   const settings = useSettingsContext();
 
-  const { user } = useMockedUser();
+  const { user, userStatus } = useUser();
+
+  // const { user } = useMockedUser();
 
   const [searchFriends, setSearchFriends] = useState('');
 
@@ -65,6 +100,26 @@ export default function UserProfileView() {
     setSearchFriends(event.target.value);
   }, []);
 
+  const renderSkeleton = <UserProfileSkeleton />;
+
+  const renderError = (
+    <EmptyContent
+      filled
+      title={`${userStatus.error?.message}`}
+      action={
+        <Button
+          component={RouterLink}
+          href={paths.dashboard.user.root}
+          startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
+          sx={{ mt: 3 }}
+        >
+          Back to List
+        </Button>
+      }
+      sx={{ py: 10 }}
+    />
+  );
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
@@ -72,7 +127,7 @@ export default function UserProfileView() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'User', href: paths.dashboard.user.root },
-          { name: user?.displayName },
+          { name: user?.username },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },
@@ -87,7 +142,7 @@ export default function UserProfileView() {
       >
         <ProfileCover
           role={_userAbout.role}
-          name={user?.displayName}
+          name={user?.username}
           avatarUrl={user?.photoURL}
           coverUrl={_userAbout.coverUrl}
         />

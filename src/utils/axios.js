@@ -39,4 +39,9 @@ export const API_ENDPOINTS = {
     details: '/api/product/details',
     search: '/api/product/search',
   },
+  user: {
+    list: '/api/users',
+    details: (id) => `/api/users/${id}`,
+    search: (param) => `/api/users${param}`,
+  },
 };

@@ -48,7 +48,7 @@ export const tokenExpired = (exp) => {
   clearTimeout(expiredTimer);
 
   expiredTimer = setTimeout(() => {
-    alert('Token expired');
+    alert('إنتهت الجلسة، يرجى تسجيل الدخول.');
 
     sessionStorage.removeItem('accessToken');
 

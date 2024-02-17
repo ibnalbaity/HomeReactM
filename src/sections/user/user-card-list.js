@@ -17,9 +17,9 @@ export default function UserCardList({ users }) {
         md: 'repeat(3, 1fr)',
       }}
     >
-      {users.map((user) => (
+      {Array.isArray(users) ? users.map((user) => (
         <UserCard key={user.id} user={user} />
-      ))}
+      )) : null}
     </Box>
   );
 }

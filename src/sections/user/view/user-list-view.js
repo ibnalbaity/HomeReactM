@@ -89,6 +89,8 @@ export default function UserListView() {
 
   const { users, usersStatus } = useUser();
 
+  console.log(usersStatus);
+
   const [tableData, setTableData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
@@ -100,8 +102,6 @@ export default function UserListView() {
       setTableData(users);
     }
   }, [users]);
-
-  console.warn(tableData);
 
   const dataFiltered = applyFilter({
     inputData: tableData,

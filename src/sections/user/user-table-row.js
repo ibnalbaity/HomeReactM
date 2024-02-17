@@ -24,9 +24,10 @@ import { fDate } from "../../utils/format-time";
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({ row, selected, onEditRow, onViewRow, onSelectRow, onDeleteRow }) {
+  console.log(row);
   const { avatarUrl, email, identification, username } = row;
 
-  const { mainInfo } = identification;
+  const { mainInfo } = identification || [];
 
   const confirm = useBoolean();
 
@@ -69,9 +70,9 @@ export default function UserTableRow({ row, selected, onEditRow, onViewRow, onSe
           />
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{mainInfo[0]?.idCard}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{Array.isArray(mainInfo) ? mainInfo[0]?.idCard : 'لا يوجد'}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{fDate(mainInfo[0]?.expire)}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{Array.isArray(mainInfo) ? fDate(mainInfo[0]?.expire) : 'لا يوجد'}</TableCell>
 
         {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>{provider}</TableCell>
 

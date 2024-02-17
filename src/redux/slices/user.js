@@ -8,12 +8,12 @@ const initialState = {
   users: [],
   user: null,
   usersStatus: {
-    loading: false,
+    loading: true,
     empty: false,
     error: null,
   },
   userStatus: {
-    loading: false,
+    loading: true,
     error: null,
   },
 };
@@ -68,31 +68,35 @@ export default slice.reducer;
 
 export function getUsers(param = null) {
   return async (dispatch) => {
-    dispatch(slice.actions.getUsersStart());
+    await dispatch(slice.actions.getUsersStart());
     try {
       const response = await axios.get(API_ENDPOINTS.user.list, {
         params: {
           ...param
         }
       });
-      dispatch(slice.actions.getUsersSuccess(response.data));
+      await dispatch(slice.actions.getUsersSuccess(response.data));
     } catch (error) {
-      dispatch(slice.actions.getUsersFailure(error));
+      await dispatch(slice.actions.getUsersFailure(error));
     }
   };
 }
 
 // ----------------------------------------------------------------------
 
-export function getUser(userId) {
+export function getUser(userId, param) {
   return async (dispatch) => {
-    dispatch(slice.actions.getUserStart());
+    await dispatch(slice.actions.getUserStart());
     try {
-      const response = await axios.get(API_ENDPOINTS.user.details(userId));
-      dispatch(slice.actions.getUserSuccess(response.data));
+      const response = await axios.get(API_ENDPOINTS.user.details(userId), {
+        params: {
+          ...param
+        }
+      });
+      await dispatch(slice.actions.getUserSuccess(response.data));
     } catch (error) {
       console.error(error);
-      dispatch(slice.actions.getUserFailure(error));
+      await dispatch(slice.actions.getUserFailure(error));
     }
   };
 }

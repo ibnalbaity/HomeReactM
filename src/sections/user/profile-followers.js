@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 // components
 import Iconify from 'src/components/iconify';
+import UserCardList from "./user-card-list";
 
 // ----------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ export default function ProfileFollowers({ followers }) {
   return (
     <>
       <Typography variant="h4" sx={{ my: 5 }}>
-        Followers
+        الجواز
       </Typography>
 
       <Box
@@ -39,18 +40,19 @@ export default function ProfileFollowers({ followers }) {
         display="grid"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
+          sm: 'repeat(1, 1fr)',
+          md: 'repeat(1, 1fr)',
         }}
       >
-        {followers.map((follower) => (
-          <FollowerItem
+        {Array.isArray(followers) ? followers.map((follower) => (
+          <UserCardList key={follower.id} users={followers} />
+          /* <FollowerItem
             key={follower.id}
             follower={follower}
             selected={followed.includes(follower.id)}
             onSelected={() => handleClick(follower.id)}
-          />
-        ))}
+          /> */
+        )) : null}
       </Box>
     </>
   );

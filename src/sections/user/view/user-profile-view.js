@@ -12,6 +12,8 @@ import { getUser } from "src/redux/slices/user";
 import { paths } from "src/routes/paths";
 import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
+// auth
+import { useAuthContext } from "src/auth/hooks";
 // hooks
 // import { useMockedUser } from "src/hooks/use-mocked-user";
 // _mock
@@ -29,28 +31,34 @@ import ProfileGallery from "../profile-gallery";
 import ProfileFollowers from "../profile-followers";
 import { UserProfileSkeleton } from "../user-skeleton";
 import { useUser } from "./hooks";
+import { HOST_API } from "../../../config-global";
 
 // ----------------------------------------------------------------------
 
 const TABS = [
   {
-    value: 'profile',
-    label: 'Profile',
+    value: 'mainInfo',
+    label: 'الهوية',
     icon: <Iconify icon="solar:user-id-bold" width={24} />,
   },
   {
-    value: 'followers',
-    label: 'Followers',
+    value: 'passport',
+    label: 'جواز السفر',
     icon: <Iconify icon="solar:heart-bold" width={24} />,
   },
   {
-    value: 'friends',
-    label: 'Friends',
+    value: 'insurance',
+    label: 'التأمين الطبي',
     icon: <Iconify icon="solar:users-group-rounded-bold" width={24} />,
   },
   {
-    value: 'gallery',
-    label: 'Gallery',
+    value: 'driverLicense',
+    label: 'رخصة القيادة',
+    icon: <Iconify icon="solar:gallery-wide-bold" width={24} />,
+  },
+  {
+    value: 'vehicleRegister',
+    label: 'استمارة السيارة',
     icon: <Iconify icon="solar:gallery-wide-bold" width={24} />,
   },
 ];
@@ -60,15 +68,17 @@ const TABS = [
 function useInitial() {
   const dispatch = useDispatch();
 
+  const { user } = useAuthContext();
+
   const params = useParams();
 
   const { id } = params;
 
   const getProductCallback = useCallback(() => {
-    if (id) {
-      dispatch(getUser(id));
+    if (id  || user?.id) {
+      dispatch(getUser(id || user?.id, { populate: 'deep,4' }));
     }
-  }, [dispatch, id]);
+  }, [dispatch, id, user]);
 
   useEffect(() => {
     getProductCallback();
@@ -86,11 +96,12 @@ export default function UserProfileView() {
 
   const { user, userStatus } = useUser();
 
+  console.log(userStatus);
   // const { user } = useMockedUser();
 
   const [searchFriends, setSearchFriends] = useState('');
 
-  const [currentTab, setCurrentTab] = useState('profile');
+  const [currentTab, setCurrentTab] = useState('mainInfo');
 
   const handleChangeTab = useCallback((event, newValue) => {
     setCurrentTab(newValue);
@@ -102,7 +113,7 @@ export default function UserProfileView() {
 
   const renderSkeleton = <UserProfileSkeleton />;
 
-  const renderError = (
+  /* const renderError = (
     <EmptyContent
       filled
       title={`${userStatus.error?.message}`}
@@ -118,15 +129,15 @@ export default function UserProfileView() {
       }
       sx={{ py: 10 }}
     />
-  );
+  ); */
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Profile"
+        heading="الملف الشخصي"
         links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
+          { name: 'الرئيسية', href: paths.dashboard.root },
+          { name: 'الأعضاء', href: paths.dashboard.user.list },
           { name: user?.username },
         ]}
         sx={{
@@ -141,10 +152,10 @@ export default function UserProfileView() {
         }}
       >
         <ProfileCover
-          role={_userAbout.role}
+          role={user?.job?.name}
           name={user?.username}
-          avatarUrl={user?.photoURL}
-          coverUrl={_userAbout.coverUrl}
+          avatarUrl={`${HOST_API}${user?.avatar?.formats?.thumbnail?.url}` || user?.username}
+          coverUrl={`${HOST_API}${user?.avatar?.url}`}
         />
 
         <Tabs
@@ -171,19 +182,15 @@ export default function UserProfileView() {
         </Tabs>
       </Card>
 
-      {currentTab === 'profile' && <ProfileHome info={_userAbout} posts={_userFeeds} />}
+      {!userStatus.loading && currentTab === 'mainInfo' && <ProfileHome info={user?.identification?.mainInfo} />}
 
-      {currentTab === 'followers' && <ProfileFollowers followers={_userFollowers} />}
+      {!userStatus.loading && currentTab === 'passport' && <ProfileHome info={user?.identification?.passport} />}
 
-      {currentTab === 'friends' && (
-        <ProfileFriends
-          friends={_userFriends}
-          searchFriends={searchFriends}
-          onSearchFriends={handleSearchFriends}
-        />
-      )}
+      {!userStatus.loading && currentTab === 'insurance' && <ProfileHome info={user?.identification?.insurance} />}
 
-      {currentTab === 'gallery' && <ProfileGallery gallery={_userGallery} />}
+      {!userStatus.loading && currentTab === 'driverLicense' && <ProfileHome info={user?.identification?.driverLicense} />}
+
+      {!userStatus.loading && currentTab === 'vehicleRegister' && <ProfileHome info={user?.identification?.vehicleRegister} />}
     </Container>
   );
 }
